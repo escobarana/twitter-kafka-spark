@@ -109,9 +109,6 @@ if __name__ == "__main__":
         "sentiment", sentiment(col("polarity"))
     )
 
-    """
-    all about tokenization
-    """
     # Create a tokenizer that Filter away tokens with length < 3, and get rid of symbols like $,#,...
     tokenizer = (
         RegexTokenizer()
