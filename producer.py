@@ -1,8 +1,9 @@
 import logging
 import os
+import time
 from argparse import ArgumentParser, FileType
 from configparser import ConfigParser
-import time
+
 import tweepy
 from confluent_kafka import Producer
 
@@ -24,7 +25,9 @@ def twitter_auth():
     :return: Twitter API object
     """
     # create the authentication object
-    authenticate = tweepy.OAuth1UserHandler(tw_api_key, tw_api_secret_key, tw_access_token, tw_access_token_secret)
+    authenticate = tweepy.OAuth1UserHandler(
+        tw_api_key, tw_api_secret_key, tw_access_token, tw_access_token_secret
+    )
     # create the API object - Authentication is automatically done using tweepy library
     api = tweepy.API(authenticate, wait_on_rate_limit=True)
 
@@ -53,7 +56,7 @@ def delivery_callback(err, msg):
 
 class TweetListener(tweepy.Client):
     """
-        This is a class that inherits from tweepy.Client and overrides on_data/on_error/on_timeout methods.
+    This is a class that inherits from tweepy.Client and overrides on_data/on_error/on_timeout methods.
     """
 
     def on_data(self, raw_data):
@@ -65,7 +68,7 @@ class TweetListener(tweepy.Client):
             return False
 
     def on_timeout(self):
-        logging.info('Snoozing Zzzzzz')
+        logging.info("Snoozing Zzzzzz")
 
     def get_recent_tweets(self, search_term):
         return self.search_recent_tweets(query=search_term)
@@ -92,7 +95,12 @@ if __name__ == "__main__":
     tweets = twitter_stream.get_recent_tweets(search_term=query)
     for _ in range(100):
         for tweet in tweets.data:
-            producer.produce(topic=topic_name, key=query, value=tweet.text, callback=delivery_callback)
+            producer.produce(
+                topic=topic_name,
+                key=query,
+                value=tweet.text,
+                callback=delivery_callback,
+            )
         time.sleep(5)  # wait 5 seconds to start a new search
 
         # Block until the messages are sent.
