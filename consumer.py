@@ -1,8 +1,27 @@
 import os
 from argparse import ArgumentParser, FileType
 from configparser import ConfigParser
+import findspark
+
+findspark.init()
+from pyspark.sql.functions import expr
+from pyspark.sql import SparkSession
 
 from confluent_kafka import OFFSET_BEGINNING, Consumer
+
+
+def create_spark_session(app_name: str):
+    return SparkSession \
+        .builder \
+        .appName(app_name) \
+        .master("local[3]") \
+        .config("spark.streaming.stopGracefullyOnShutdown", "true") \
+        .getOrCreate()
+
+
+def transform(kafka_msg):
+    words_df = kafka_msg.select(expr("explode(split(value,' ')) as word"))
+    return words_df.groupBy("word").count()
 
 
 # Set up a callback to handle the '--reset' flag.
@@ -14,6 +33,9 @@ def reset_offset(consumer, partitions):
 
 
 if __name__ == "__main__":
+    # Create a Spark Session
+    spark = create_spark_session(app_name="File Streaming Demo")
+
     # Parse the command line.
     parser = ArgumentParser()
     parser.add_argument("config_file", type=FileType("r"))
@@ -50,6 +72,18 @@ if __name__ == "__main__":
                         value=msg.value().decode("utf-8"),
                     )
                 )
+                # Perform Spark computations - count number of words and write parquet file
+                counts_df = transform(msg)
+                # checkpointLocation is needed to store progress information about the streaming job
+                word_count_query = (
+                    counts_df.writeStream.format("console")
+                    .outputMode("complete")
+                    .option("checkpointLocation", "chk-point-dir")
+                    .start()
+                )  # starts background job
+
+                # wait until the background job finishes
+                word_count_query.awaitTermination()
     except KeyboardInterrupt:
         pass
     finally:

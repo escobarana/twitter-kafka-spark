@@ -15,7 +15,7 @@ tw_access_token = os.environ["TWITTER_ACCESS_TOKEN"]
 tw_access_token_secret = os.environ["TWITTER_ACCESS_TOKEN_SECRET"]
 tw_api_bearer_token = os.environ["TWITTER_BEARER_TOKEN"]
 
-query = "Data Engineering"
+query = "#Eurovision2023"
 topic_name = os.environ["KAFKA_TOPIC_NAME"]
 
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
             producer.produce(
                 topic=topic_name,
                 key=query,
-                value=tweet.text,
+                value=tweet.text,  # we only want the text of the tweet
                 callback=delivery_callback,
             )
         time.sleep(5)  # wait 5 seconds to start a new search

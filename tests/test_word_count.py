@@ -1,0 +1,34 @@
+import findspark
+from pyspark.sql.types import StructType, StructField, StringType, LongType
+
+findspark.init()
+from pyspark.sql import SparkSession
+from consumer import transform
+from .comparers import assert_frames_functionally_equivalent
+
+spark = SparkSession.builder.getOrCreate()
+
+
+def test_word_count():
+    input_str = "I love Spark , Spark Structure Streaming. I am learning Spark !"
+    df = spark.createDataFrame([[input_str]], schema=StructType([
+                                                StructField("value", StringType(), True)
+                                            ]))
+
+    res_df = transform(kafka_msg=df)
+
+    expected_df = spark.createDataFrame([("!", 1),
+                                         ("love", 1),
+                                         ("learning", 1),
+                                         ("I", 2),
+                                         (",", 1),
+                                         ("Spark", 3),
+                                         ("am", 1),
+                                         ("Structure", 1),
+                                         ("Streaming.", 1)],
+                                        schema=StructType([
+                                            StructField("word", StringType(), True),
+                                            StructField("count", LongType(), False)
+                                        ]))
+
+    assert_frames_functionally_equivalent(res_df, expected_df)
