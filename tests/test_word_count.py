@@ -14,7 +14,7 @@ spark = SparkSession.builder.getOrCreate()
 def test_word_count():
     input_str = "I love Spark , Spark Structure Streaming. I am learning Spark !"
     df = spark.createDataFrame(
-        [[input_str]], schema=StructType([StructField("value", StringType(), True)])
+        [[input_str]], schema=StructType([StructField("value", StringType(), False)])
     )
 
     res_df = transform(kafka_msg=df)
@@ -33,7 +33,7 @@ def test_word_count():
         ],
         schema=StructType(
             [
-                StructField("word", StringType(), True),
+                StructField("word", StringType(), False),
                 StructField("count", LongType(), False),
             ]
         ),
