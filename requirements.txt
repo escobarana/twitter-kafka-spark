@@ -1,6 +1,8 @@
+findspark~=2.0.1  # For windows users
 tweepy~=4.14.0
 textblob~=0.17.1
-pyspark~=3.4.0
+pyspark==3.4.0  # For mac/linux users - Also GitHub Actions !!
+pytest
 black==23.3.0
 isort==5.12.0
 confluent-kafka==2.1.1

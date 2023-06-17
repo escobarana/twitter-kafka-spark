@@ -1,22 +1,22 @@
 import os
 from argparse import ArgumentParser, FileType
 from configparser import ConfigParser
+
 import findspark
 
 findspark.init()
-from pyspark.sql.functions import expr
-from pyspark.sql import SparkSession
-
 from confluent_kafka import OFFSET_BEGINNING, Consumer
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
 
 
 def create_spark_session(app_name: str):
-    return SparkSession \
-        .builder \
-        .appName(app_name) \
-        .master("local[3]") \
-        .config("spark.streaming.stopGracefullyOnShutdown", "true") \
+    return (
+        SparkSession.builder.appName(app_name)
+        .master("local[3]")
+        .config("spark.streaming.stopGracefullyOnShutdown", "true")
         .getOrCreate()
+    )
 
 
 def transform(kafka_msg):
