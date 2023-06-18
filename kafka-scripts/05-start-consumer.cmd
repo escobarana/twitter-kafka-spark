@@ -1,1 +1,1 @@
-C:\kafka\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic notifications --from-beginning
+C:\kafka\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic eurovision2023 --from-beginning
